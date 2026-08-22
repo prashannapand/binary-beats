@@ -1,0 +1,62 @@
+name: CI
+
+on:
+  push:
+    branches: [ main, master ]
+  pull_request:
+    branches: [ main, master ]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:15
+        env:
+          POSTGRES_DB: seamless
+          POSTGRES_USER: seamless
+          POSTGRES_PASSWORD: seamless
+        options: >-
+          --health-cmd="pg_isready -U seamless -d seamless" --health-interval=5s --health-timeout=5s --health-retries=5
+      redis:
+        image: redis:7
+        options: >-
+          --health-cmd="redis-cli ping" --health-interval=5s --health-timeout=5s --health-retries=5
+
+    env:
+      POSTGRES_DB: seamless
+      POSTGRES_USER: seamless
+      POSTGRES_PASSWORD: seamless
+      POSTGRES_HOST: localhost
+      POSTGRES_PORT: 5432
+      REDIS_URL: redis://localhost:6379
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.11'
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+
+      - name: Wait for services
+        run: |
+          for i in {1..30}; do
+            nc -z localhost 5432 && echo "Postgres up" && break
+            echo "Waiting for Postgres..." && sleep 1
+          done
+          for i in {1..30}; do
+            nc -z localhost 6379 && echo "Redis up" && break
+            echo "Waiting for Redis..." && sleep 1
+          done
+
+      - name: Run migrations & tests
+        run: |
+          python manage.py migrate --noinput
+          python manage.py seed_demo || true
+          python manage.py test --verbosity=2

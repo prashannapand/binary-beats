@@ -1,0 +1,13 @@
+Django>=4.2
+djangorestframework
+djangorestframework-simplejwt
+channels
+channels-redis
+psycopg2-binary
+django-filter
+qrcode
+Pillow
+asgiref
+python-dotenv
+daphne==4.2.1
+
