@@ -282,7 +282,7 @@ function MenuAdminItem({ item, categories, onEdit, onDelete, onToggleAvailabilit
             {item.is_vegetarian === false && <Badge variant="nonveg" size="sm">Non-veg</Badge>}
           </div>
           <p className="mt-1 text-sm text-staff-500">{item.description || 'No description'}</p>
-          <p className="mt-1 text-sm font-medium text-staff-900">Rs. {Number(item.unit_price).toFixed(0)}</p>
+          <p className="mt-1 text-sm font-medium text-staff-900">Rs. {Number(item.price).toFixed(0)}</p>
         </div>
 
         <div className="flex items-center gap-2 flex-wrap">
